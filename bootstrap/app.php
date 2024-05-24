@@ -60,6 +60,7 @@ $app->singleton(
 */
 
 $app->configure('app');
+$app->configure('qidian');
 
 /*
 |--------------------------------------------------------------------------
@@ -79,7 +80,7 @@ $app->configure('app');
 $app->routeMiddleware([
 //     'auth' => App\Http\Middleware\Authenticate::class,
     //微信服务授权中间件
-    'wechat.oauth' => \Overtrue\LaravelWeChat\Middleware\OAuthAuthenticate::class,
+    //'wechat.oauth' => \Overtrue\LaravelWeChat\Middleware\OAuthAuthenticate::class,
 ]);
 /*
 |--------------------------------------------------------------------------
@@ -97,6 +98,7 @@ $app->routeMiddleware([
 // $app->register(App\Providers\EventServiceProvider::class);
 $app->register(Overtrue\LaravelWeChat\ServiceProvider::class);
 $app->register(Illuminate\Redis\RedisServiceProvider::class);
+$app->register(Prettus\Repository\Providers\LumenRepositoryServiceProvider::class);
 /*
 |--------------------------------------------------------------------------
 | Load The Application Routes

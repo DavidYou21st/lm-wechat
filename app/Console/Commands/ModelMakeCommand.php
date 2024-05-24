@@ -46,6 +46,6 @@ class ModelMakeCommand extends GeneratorCommand {
      * @return string
      */
     protected function getDefaultNamespace($rootNamespace) {
-        return is_dir(app_path('Models')) ? $rootNamespace.'\\Models' : $rootNamespace;
+        return $rootNamespace.'\\Models';
     }
 }

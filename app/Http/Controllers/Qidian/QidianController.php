@@ -3,12 +3,14 @@
 namespace App\Http\Controllers\Qidian;
 
 use App\Http\Controllers\Controller;
+use App\Services\Qidian\CustomerService;
 use Illuminate\Http\Request;
 use App\Services\Qidian\QidianService;
+use App\Http\Requests\Qidian\ServeRequest;
 
 /**
  * 腾讯企点控制器
- * Class EventController
+ * Class QidianController
  */
 class QidianController extends Controller
 {
@@ -22,10 +24,10 @@ class QidianController extends Controller
     /**
      * 处理腾讯企点的服务器消息
      * @see https://api.qidian.qq.com/wiki/doc/open/emxmpkwd5soewhkky37i
-     * @param Request $request
+     * @param ServeRequest $request
      * @return string
      */
-    public function serve(Request $request)
+    public function serve(ServeRequest $request)
     {
         $resp = $this->service->serve($request);
         return response($resp);
@@ -64,4 +66,18 @@ class QidianController extends Controller
         $resp = [];
         return response($resp);
     }
+
+
+    /**
+     * 测试
+     * @return string
+     */
+    public function test(CustomerService $service)
+    {
+        //拉取客户列表
+        $custid = "30091260970000000000000000000002";
+//        $service->getCustBaseInfo($custid);
+        $service->getCustList();
+    }
+
 }

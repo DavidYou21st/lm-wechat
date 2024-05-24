@@ -1,0 +1,13 @@
+<?php
+
+namespace {{ namespace }};
+
+use Prettus\Repository\Eloquent\BaseRepository;
+
+class {{ class }} extends BaseRepository
+{
+    public function model()
+    {
+        // TODO: Implement model() method.
+    }
+}

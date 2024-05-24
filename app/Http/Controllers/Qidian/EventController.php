@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\qidian;
+namespace App\Http\Controllers\Qidian;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;

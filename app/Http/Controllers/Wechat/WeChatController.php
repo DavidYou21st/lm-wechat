@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Wechat;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
+use App\Services\Wechat\WechatService;
 
 /**
  * 微信服务控制器
@@ -11,6 +11,13 @@ use Illuminate\Http\Request;
  */
 class WeChatController extends Controller
 {
+    private $service;
+
+    public function __construct(WechatService $service)
+    {
+        $this->service = $service;
+    }
+
     /**
      * 处理微信的请求消息
      *
@@ -18,14 +25,11 @@ class WeChatController extends Controller
      */
     public function serve()
     {
-        #Log::info('request arrived.'); # 注意：Log 为 Laravel 组件，所以它记的日志去 Laravel 日志看，而不是 EasyWeChat 日志
-        /**
-         * 公众号服务
-         * @see \EasyWeChat\OfficialAccount\Application
-         */
+        $this->log('wechat request arrived.', 'info');
+
         $app = app('wechat.official_account');
-        $app->server->push(function ($message) {
-            return "您好！欢迎关注我!";
+        $app->server->push(function($message){
+            return "欢迎关注 longmao 微信公众号！";
         });
 
         return $app->server->serve();

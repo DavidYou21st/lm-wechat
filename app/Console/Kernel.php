@@ -2,11 +2,16 @@
 
 namespace App\Console;
 
+use App\Console\Commands\ConsoleMakeCommand;
 use App\Console\Commands\ControllerMakeCommand;
 use App\Console\Commands\MiddlewareMakeCommand;
 use App\Console\Commands\ModelMakeCommand;
+use App\Console\Commands\RepositoryMakeCommand;
+use App\Console\Commands\RequestMakeCommand;
+use App\Jobs\GetQidianCustomerBaseInfoJob;
 use Illuminate\Console\Scheduling\Schedule;
 use Laravel\Lumen\Console\Kernel as ConsoleKernel;
+use App\Jobs\GetQidianCustomerListJob;
 
 class Kernel extends ConsoleKernel
 {
@@ -22,6 +27,12 @@ class Kernel extends ConsoleKernel
         MiddlewareMakeCommand::class,
         //生成Model命令
         ModelMakeCommand::class,
+        //生成Request命令
+        RequestMakeCommand::class,
+        //生成Console命令
+        ConsoleMakeCommand::class,
+        //生成Repository命令
+        RepositoryMakeCommand::class,
     ];
 
     /**
@@ -32,6 +43,13 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        //
+        // 拉取企点客户列表
+//        $schedule->call(new GetQidianCustomerListJob)->withoutOverlapping()->everyMinute(); // 每小时运行一次
+//
+//        // 拉取企点客户信息
+//        $schedule->job(new GetQidianCustomerBaseInfoJob)->daily(); // 每天运行一次
+
+        // 你可以定义多个任务
+        // $schedule->command('emails:send')->dailyAt('15:00'); // 每天下午3点运行
     }
 }

@@ -54,6 +54,26 @@ return [
             'unix_socket' => env('DB_SOCKET', ''),
             'charset' => 'utf8mb4',
             'collation' => 'utf8mb4_unicode_ci',
+            'prefix' => env('DB_PREFIX', ''),
+            'prefix_indexes' => true,
+            'strict' => true,
+            'engine' => 'InnoDB ROW_FORMAT=DYNAMIC',
+            'options' => extension_loaded('pdo_mysql') ? array_filter([
+                PDO::MYSQL_ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
+            ]) : [],
+        ],
+
+        'lm_wechat' => [
+            'driver' => 'mysql',
+            'url' => env('DATABASE_URL'),
+            'host' => env('LM_GAME_DB_HOST', '127.0.0.1'),
+            'port' => env('DB_PORT', '3306'),
+            'database' => env('LM_GAME_DB_DATABASE', 'forge'),
+            'username' => env('LM_GAME_DB_USERNAME', 'forge'),
+            'password' => env('LM_GAME_DB_PASSWORD', ''),
+            'unix_socket' => env('DB_SOCKET', ''),
+            'charset' => 'utf8mb4',
+            'collation' => 'utf8mb4_unicode_ci',
             'prefix' => 'admin_',
             'prefix_indexes' => true,
             'strict' => true,
@@ -194,6 +214,7 @@ return [
             'username' => env('REDIS_USERNAME'),
             'password' => env('REDIS_PASSWORD'),
             'port' => env('REDIS_PORT', '6379'),
+            'auth' => env('REDIS_AUTH', ''),
             'database' => env('REDIS_DB', '0'),
         ],
 
@@ -203,6 +224,7 @@ return [
             'username' => env('REDIS_USERNAME'),
             'password' => env('REDIS_PASSWORD'),
             'port' => env('REDIS_PORT', '6379'),
+            'auth' => env('REDIS_AUTH', ''),
             'database' => env('REDIS_CACHE_DB', '1'),
         ],
 

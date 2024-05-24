@@ -18,15 +18,12 @@ $router->get('/', function () use ($router) {
 });
 
 // 微信服务路由
-$router->group(['namespace' => 'Wechat', 'middleware' => ['web', 'wechat.oauth']], function () use ($router) {
+$router->group(['namespace' => 'Wechat', 'prefix' => 'wechat', 'middleware' => []], function () use ($router) {
     //微信服务 注意：在laravel要使用 Route::any, 由于lumen没有any路由，只能使用GET和POST两个路由，因为微信服务端认证的时候是 GET, 接收用户消息时是 POST
     $router->get('/wechat', 'WeChatController@serve');
     $router->post('/wechat', 'WeChatController@serve');
-    $router->get('/user', function () {
-        $user = session('wechat.oauth_user.default'); // 拿到授权用户资料
-
-        dd($user);
-    });
+    //测试
+    $router->get('/test', 'WorkController@test');
 });
 
 // 腾讯企点服务路由
@@ -39,4 +36,8 @@ $router->group(['namespace' => 'Qidian', 'prefix' => 'qidian', 'middleware' => [
     $router->post('/event', 'QidianController@event');
     //应用授权地址（指令回调URL）
     $router->get('/appAuth', 'QidianController@appAuth');
+    //测试
+    $router->get('/test', 'QidianController@test');
+    //测试
+    $router->get('/test', 'QidianController@test');
 });

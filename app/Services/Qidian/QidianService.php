@@ -7,13 +7,14 @@
 
 namespace App\Services\Qidian;
 
+use App\Http\Requests\Qidian\ServeRequest;
 use App\Services\BaseService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use TencentQidian\App\Qdauthorize\Common\Common;
 use TencentQidian\App\Qdauthorize\Company\CompanyService;
 use TencentQidian\App\Qdauthorize\Selfbuilt\SelfBuiltService;
 use TencentQidian\App\Qdbizmsgcrypt\QDMsgCrypt;
-use SimpleXMLElement;
 
 /**
  * 腾讯企点服务业务逻辑
@@ -24,7 +25,7 @@ class QidianService extends BaseService
     /**
      * @var string 企点自建应用token
      */
-    private string $access_token;
+    protected string $access_token;
 
     // 企点接口参数规则
     private array $rules = [
@@ -55,18 +56,21 @@ class QidianService extends BaseService
             'app_id' => $config['app_id'] ?? null,
             'secret' => $config['secret'] ?? null,
             'sid' => $config['sid'] ?? null,
+            'built_app_id' => $config['built_app_id'] ?? null,
             'built_app_secret' => $config['built_app_secret'] ?? null,
         ];
+
+        $this->getAccessToken();
     }
 
     /**
      * 处理腾讯企点的请求消息
-     * @param Request $request
+     * @param ServeRequest $request
      * @return string
      */
-    public function serve(Request $request)
+    public function serve(ServeRequest $request)
     {
-        if (!$request->validate($this->rules)) {//参数验证不通过，返回错误
+        if (!$request->validate()) {//参数验证不通过，返回错误
             return 'fail';
         }
         //企点加密解密工具
@@ -95,13 +99,14 @@ class QidianService extends BaseService
              *  企点服务器向注册的服务器地址发送post请求
              *  解析xml推送内容
              */
-            $signature = $request->get('signature');
+            $signature = $request->get('msg_signature');
             $timestamp = $request->get('timestamp');
+            $encrypt_type = $request->get('encrypt_type');
             $nonce = $request->get('nonce');
             $fromXml = $request->getContent();//获取原始字符串
             $msg = '';
             $errCode = $pc->decryptMsg($signature, $timestamp, $nonce, $fromXml, $msg);
-            if ($errCode == 0) {//解密成功，处理业务逻辑
+            if (0 == $errCode) {//解密成功，处理业务逻辑
                 $data = simplexml_load_string($msg);
                 switch ($data->MsgType) {
                     case 'text':
@@ -116,7 +121,7 @@ class QidianService extends BaseService
                 }
                 return 'success';
             } else {
-                print($errCode . "\n");
+                $this->log($errCode, 'error');
                 return 'fail';
             }
         }
@@ -204,26 +209,30 @@ class QidianService extends BaseService
     }
 
     /**
-     * 给腾讯企点的推送消息
-     * @return string
+     * 获取调用凭证(自建应用主调流程，应用开发者调用企点的接口)
      */
-    public function push()
+    public function getAccessToken()
     {
+        //先从缓存中取企点的调用凭证，如果缓存中存在，则直接返回
+        $access_token =  Cache::get('qidian:access_token');
+        if (!empty($access_token)) {
+            $this->access_token = $access_token;
+            return $this;
+        }
 
-    }
-
-    /**
-     * 获取自建应用的token
-     */
-    public function getToken()
-    {
         $object = new SelfBuiltService($this->config['token'], $this->config['aes_key'], $this->config['app_id']);
         $data = $object->getSelfBuildToken($this->config['app_id'], $this->config['sid'], $this->config['built_app_secret']);
-        if (0 !== $data['data']['code']) {//获取token失败
+        if (0 !== $data['code']) {//获取token失败
             # TODO 错误处理
-
+            var_dump($data);
         }
-        $this->access_token = $data['data']['access_token'] ?? null;//自建应用token
+        $expires_in = $data['data']['expires_in'] ?? 0;//过期时间戳
+        $this->access_token = $data['data']['access_token'] ?? null;//获取调用凭证
+        if (!empty($this->access_token)) {
+            //缓存调用凭证
+            Cache::put('qidian:access_token', $this->access_token, $expires_in);
+        }
+
         return $this;
     }
 
@@ -233,15 +242,24 @@ class QidianService extends BaseService
      */
     public function refreshToken()
     {
-        $object = new CompanyService($this->config['token'], $this->config['aes_key'], $this->config['app_id']);
-        $companyRefreshTokenResult = $object->getCompanyRefreshToken($componentAccessToken, $app_id, $authorizerapp_id, $authorizerRefreshToken, $sid);
+//        $object = new CompanyService($this->config['token'], $this->config['aes_key'], $this->config['app_id']);
+//        $companyRefreshTokenResult = $object->getCompanyRefreshToken(
+//            $this->access_token, $this->config['app_id'], $authorizerapp_id, $authorizerRefreshToken, $sid
+//        );
+
     }
 
     /**
      * 获取ticket票据
      */
-    public function getTicket()
+    public function getTicket(Request $request)
     {
+        $encryXml = $request->get('encryXml');//应用授权code
+        $state = $request->get('state');//加密类型
+        $app_id = $request->get('app_id');//appid
+        $sid = $request->get('sid');//企业ID
+        $fromXml = $request->getContent();//获取原始密文
+
         $encryXml = '<xml><AppId><![CDATA[202187955]]></AppId><Encrypt><![CDATA[VSq7MZqlKPgkUhcPKj6bKnAlTMSBSjIe/YEP09I84qhC4NScb6Z7/dmEFv9kUUFV3nWdIVPDO1HK36TOIceFAk9XR1iwrAjKVHFw//Y33REHmU3StpRlVxeji6/Dk2yXIhV3SetBAvwjaBgiPVJubRqlZHpmR9lsCmD1M6d/Ul69EHm13f1Su1OeY/vDy63mYIpAKv9yiAnkr/2NRx+iMnjbT7Q12N4cxDw5yfingA3wrg8xCxDqJhlxb5BtUjsKuQh2rXfbpkHwAOPCMD262B6s21lcKacUc4eJb0Adj6rLgu26C1wPe2+Yf4lZixTgiPYcBOezLf+FtXlSowvtmg==]]></Encrypt></xml>';
         $signature = '4e182dd2652bca811f86c2f04a11d65d80ae4b67';
         $timestamp = '1630374604';
@@ -263,5 +281,15 @@ class QidianService extends BaseService
         $componentAccessTokenResult = $object->getAccessToken($this->config['app_id'], $this->config['secret'], $ticket);
         var_dump($componentAccessTokenResult); // $componentAccessToken = $componentAccessTokenResult['data']['component_access_token'];
         print("\n");
+    }
+
+    /**
+     * 获取自建应用的token
+     * @return void
+     */
+    public function getToken()
+    {
+        $object = new SelfBuiltService($this->config['token'], $this->config['aes_key'], $this->config['app_id']);
+        $selfBuildToken = $object->getSelfBuildToken($this->config['app_id'], $this->config['sid'], $this->config['secret']);
     }
 }
