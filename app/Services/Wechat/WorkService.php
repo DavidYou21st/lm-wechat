@@ -36,13 +36,13 @@ class WorkService extends BaseService
     }
 
     /**
-     * 企业微信的回调
-     * @return void
+     * 处理企业微信的回调消息事件
+     * @return string
      */
-    public function callback(Request $request)
+    public function event(Request $request)
     {
         $xml_str = $request->getContent();
-        $this->log('收到企业微信平台的回调事件：' . $xml_str);
+        $this->log('收到企业微信的回调消息事件：' . $xml_str);
         $request_xml = (array)simplexml_load_string($xml_str);
         if (isset($request_xml['Event']) && ('kf_msg_or_event' == $request_xml['Event'])) {
             if ($token = $request_xml['Token'] ?? '') {
@@ -50,7 +50,7 @@ class WorkService extends BaseService
                 $data = $work->msg_audit->getSingleAgreeStatus($info);
             }
         }
-
+        return 'success';
     }
 
     public function getAccessToken()
@@ -77,7 +77,8 @@ class WorkService extends BaseService
     {
         $app = Facade::work('chatdata_sync_msg');
         $data = $app->msg_audit->getPermitUsers();
-        var_dump($data);exit();
+        var_dump($data);
+        exit();
     }
 
     /**
@@ -86,11 +87,12 @@ class WorkService extends BaseService
      */
     public function getKefuList()
     {
-        $app = Facade::work('default');
+        $app = Facade::work('user_detail');
         $data = $app->kf_account->list();
+        var_dump($data);exit();
         if (0 == $data['errcode']) {
             $corp_id = config('wechat.work.default.corp_id');
-            $this->kefuRepository->add($data['account_list'], $corp_id);
+            $this->kefuRepository->add($data['account_list'] ?? [], $corp_id);
         }
     }
 
@@ -100,11 +102,11 @@ class WorkService extends BaseService
      */
     public function getFollowUsers()
     {
-        $app = Facade::work('default');
+        $app = Facade::work('user_detail');
         $data = $app->external_contact->getFollowUsers();
         if (0 == $data['errcode']) {
             $corp_id = config('wechat.work.default.corp_id');
-            $this->followUserRepository->add($data['follow_user'], $corp_id);
+            $this->followUserRepository->add($data['follow_user'] ?? [], $corp_id);
         }
     }
 
@@ -114,14 +116,14 @@ class WorkService extends BaseService
      */
     public function getCustomers()
     {
-        $app = Facade::work('default');
+        $app = Facade::work('user_detail');
         //获取所有接待人员
         $follow_users = $this->followUserRepository->getAll();
+        $corp_id = config('wechat.work.default.corp_id');
         foreach ($follow_users as $item) {
             //查询接待人员添加的客户列表
             $data = $app->external_contact->list($item['user_id']);
             if (0 == $data['errcode']) {
-                $corp_id = config('wechat.work.default.corp_id');
                 $this->customerRepository->add($data['external_userid'] ?? [], $corp_id);
             }
         }
@@ -133,7 +135,7 @@ class WorkService extends BaseService
      */
     public function updateCustomerInfo()
     {
-        $app = Facade::work('default');
+        $app = Facade::work('user_detail');
         $i = 0;
         //获取企业微信客户
         while ($users = $this->customerRepository->paginate(100, 'external_userid')) {
@@ -150,5 +152,28 @@ class WorkService extends BaseService
             $i++;
         }
         echo $i;
+    }
+
+    /**
+     * 获取应用的jsapi_ticket
+     * @return string
+     */
+    public function getAgentTicket()
+    {
+        $app = Facade::work('default');
+        $agent_id = config('wechat.work.default.agent_id');
+        $data = $app->jssdk->getAgentTicket($agent_id);
+        return $data['ticket'] ?? '';
+    }
+
+    /**
+     * 获取企业的jsapi_ticket
+     * @return string
+     */
+    public function getEnterpriseTicket()
+    {
+        $app = Facade::work('default');
+        $data = $app->jssdk->getTicket();
+        return $data['ticket'] ?? '';
     }
 }

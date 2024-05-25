@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "6f43e09cc66c4588e4505e26c16cb6bc",
+    "content-hash": "717815fd09043ecccdc94d1fd0ae31c4",
     "packages": [
         {
             "name": "brick/math",
@@ -3453,6 +3453,61 @@
                 "source": "https://github.com/silexphp/Pimple/tree/v3.5.0"
             },
             "time": "2021-10-28T11:13:42+00:00"
+        },
+        {
+            "name": "pkg6/wework-finance",
+            "version": "0.1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/pkg6/wxwork-finance.php.git",
+                "reference": "a96b4ce803b18354636ed80349e9b7900322ffa3"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/pkg6/wxwork-finance.php/zipball/a96b4ce803b18354636ed80349e9b7900322ffa3",
+                "reference": "a96b4ce803b18354636ed80349e9b7900322ffa3",
+                "shasum": ""
+            },
+            "require": {
+                "ext-json": "*",
+                "ext-openssl": "*",
+                "php": ">=7.4"
+            },
+            "require-dev": {
+                "friendsofphp/php-cs-fixer": "^3.9",
+                "phpunit/phpunit": "^8"
+            },
+            "suggest": {
+                "ext-wxwork_finance_sdk": "*",
+                "php": ">=7.4"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Pkg6\\WeWorkFinance\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "zzqqw",
+                    "email": "zhiqiangwang@aliyun.com"
+                }
+            ],
+            "description": "WeWorkFinanceSDK(https://developer.work.weixin.qq.com/document/path/91774)",
+            "keywords": [
+                "php",
+                "wework",
+                "wework finance SDK"
+            ],
+            "support": {
+                "issues": "https://github.com/pkg6/wxwork-finance.php/issues",
+                "source": "https://github.com/pkg6/wxwork-finance.php/tree/0.1.0"
+            },
+            "time": "2024-01-05T06:22:11+00:00"
         },
         {
             "name": "predis/predis",

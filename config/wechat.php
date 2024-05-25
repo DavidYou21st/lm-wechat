@@ -126,8 +126,19 @@ return [
      * 企业微信
      */
     'work' => [
-        //用户详情应用
+        //微信客服应用
         'default' => [
+            'corp_id' => env('WECHAT_WORK_CORP_ID', ''),
+            'secret' => env('WECHAT_WORK_KEFU_SECRET', ''),
+            'encoding_aes_key' => env('WECHAT_EVENT_ENCODINGAESKEY', ''),
+            'token' => env('WECHAT_EVENT_TOKEN', ''),
+            'http' => [
+                'timeout' => 5.0,
+                'base_uri' => 'https://qyapi.weixin.qq.com/',
+            ],
+        ],
+        //用户详情应用
+        'user_detail' => [
             'corp_id' => env('WECHAT_WORK_CORP_ID', ''),
             'secret' => env('WECHAT_WORK_USER_DETAIL_SECRET', ''),
             'agent_id' => env('WECHAT_WORK_USER_DETAIL_AGENT_ID', ''),
@@ -152,11 +163,9 @@ return [
         'chatdata_sync_msg' => [
             'corp_id' => env('WECHAT_WORK_CORP_ID', ''),
             'secret' => env('WECHAT_WORK_CHATDATA_SYNC_MSG_SECRET', ''),
-            'aes_key' => env('WECHAT_WORK_AES_KEY', ''),
-            'http' => [
-                'timeout' => 5.0,
-                'base_uri' => 'https://qyapi.weixin.qq.com/',
-            ],
+            'private_keys' => [
+                "v1" => env('WECHAT_WORK_CHATDATA_V1_PRIVATE_KEY', ''),
+            ]
         ],
     ],
 

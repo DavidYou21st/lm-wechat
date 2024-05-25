@@ -3,9 +3,9 @@
 namespace App\Http\Controllers\Wechat;
 
 use App\Http\Controllers\Controller;
+use App\Services\Wechat\MessageService;
 use App\Services\Wechat\WechatService;
 use App\Services\Wechat\WorkService;
-use Illuminate\Http\Request;
 
 /**
  * 企业微信客服控制器
@@ -31,16 +31,16 @@ class WorkController extends Controller
      */
     public function test(WorkService $service)
     {
-        $service->getPermitUsers();
+        $service->getKefuList();
     }
 
     /**
-     * 处理企业微信的回调消息
+     * 接收企业微信的回调消息事件
      *
      * @return string
      */
-    public function callback(WorkService $service)
+    public function event(WorkService $service)
     {
-        $service->callback();
+        $service->event();
     }
 }
